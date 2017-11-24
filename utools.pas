@@ -56,6 +56,12 @@ type
     procedure AddPoint(Point: TPoint); override;
   end;
 
+  THandTool = class(TFigureTool)
+    FIRSTPOINT: TPoint;
+    FIRSTOFFSET: TPoint;
+    procedure FigureCreate(Point: TPoint); override;
+    procedure AddPoint(Point: TPoint); override;
+  end;
 
 var
 
@@ -189,6 +195,17 @@ begin
   end;
 end;
 
+procedure THandTool.FigureCreate(Point: TPoint);
+begin
+  FIRSTPOINT := Point;
+  FIRSTOFFSET := offset;
+end;
+
+procedure THandTool.AddPoint(Point: TPoint);
+begin
+  offset := FIRSTOFFSET + FIRSTPOINT - Point;
+end;
+
 constructor TPencilTool.Create;
 begin
   SetLength(Properties, 3);
@@ -250,7 +267,8 @@ initialization
   RegisterTool(TPolylineTool.Create, TPolyline, 'Polyline', 'Polyline.jpg');
   RegisterTool(TRectangleTool.Create, TRectangle, 'Rectangle', 'Rectangle.jpg');
   RegisterTool(TEllipseTool.Create, TEllipse, 'Ellipse', 'Ellipse.jpg');
-  RegisterTool(TRoundRectangleTool.Create, TRoundRectangle, 'RoundRectangle', 'RoundRectangle.jpg');
+  RegisterTool(TRoundRectangleTool.Create, TRoundRectangle, 'RoundRectangle',
+    'RoundRectangle.jpg');
+  RegisterTool(THandTool.Create, nil, 'Hand', 'Hand.jpg');
 
 end.
-

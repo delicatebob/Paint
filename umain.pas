@@ -175,10 +175,7 @@ end;
 
 procedure TMainForm.HelpMenuClick(Sender: TObject);
 begin
-  if aboutprogramForm.Showing then
-    aboutprogramMenu.Enabled := False
-  else
-    aboutprogramMenu.Enabled := True;
+  aboutprogramMenu.Enabled := not aboutprogramForm.Showing;
 end;
 
 procedure TMainForm.AboutProgramMenuClick(Sender: TObject);
