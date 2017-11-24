@@ -1,0 +1,53 @@
+object MainForm: TMainForm
+  Left = 228
+  Height = 489
+  Top = 57
+  Width = 643
+  Caption = 'Графический редактор'
+  ClientHeight = 469
+  ClientWidth = 643
+  Constraints.MinHeight = 480
+  Constraints.MinWidth = 640
+  Menu = MainMenu
+  OnCreate = FormCreate
+  LCLVersion = '1.6.4.0'
+  object PaintBox: TPaintBox
+    Left = 128
+    Height = 469
+    Top = 0
+    Width = 515
+    Align = alClient
+    OnMouseDown = PaintBoxMouseDown
+    OnMouseMove = PaintBoxMouseMove
+    OnMouseUp = PaintBoxMouseUp
+    OnPaint = PaintBoxPaint
+  end
+  object ToolsAndPropertyPanel: TPanel
+    Left = 0
+    Height = 469
+    Top = 0
+    Width = 128
+    Align = alLeft
+    Color = clWhite
+    ParentColor = False
+    TabOrder = 0
+  end
+  object MainMenu: TMainMenu
+    left = 96
+    object FileMenu: TMenuItem
+      Caption = 'Файл'
+      object ExitMenu: TMenuItem
+        Caption = 'Выход'
+        OnClick = ExitMenuClick
+      end
+    end
+    object HelpMenu: TMenuItem
+      Caption = 'Справка'
+      OnClick = HelpMenuClick
+      object AboutProgramMenu: TMenuItem
+        Caption = 'О программе'
+        OnClick = AboutProgramMenuClick
+      end
+    end
+  end
+end
