@@ -16,14 +16,12 @@ type
   end;
 
   TPenStyleProperty = class(TProperty)
-    Pen_Styles: array [0..4] of string;
     ToolPenStyle: TComboBox;
     procedure ObjectsCreate override;
     procedure PenStyleChange(Sender: TObject);
   end;
 
   TBrushStyleProperty = class(TProperty)
-    Brush_Styles: array [0..7] of string;
     ToolBrushStyle: TComboBox;
     procedure ObjectsCreate override;
     procedure BrushStyleChange(Sender: TObject);
@@ -45,7 +43,6 @@ type
     ToolColor: TColorButton;
     procedure ObjectsCreate override;
     procedure ColorChange(Sender: TObject);
-    //function BrushColor: TColor;
   end;
 
   TRoundProperty = class(TProperty)
@@ -55,6 +52,19 @@ type
     procedure RoundChangeX(Sender: TObject);
     procedure RoundChangeY(Sender: TObject);
   end;
+
+const
+  Pen_Styles: array [0..4] of string =
+    (
+    'psSolid', 'psDash', 'psDot',
+    'psDashDot', 'psDashDotDot'
+    );
+  Brush_Styles: array [0..7] of string =
+    (
+    'bsClear', 'bsSolid', 'bsHorizontal',
+    'bsVertical', 'bsFDiagonal', 'bsBDiagonal',
+    'bsCross', 'bsDiagCross'
+    );
 
 var
   PWidth: byte = 1;
@@ -270,12 +280,4 @@ begin
   PRoundY := ToolRoundY.Value;
 end;
 
-initialization
-  //Pen_Styles =
-  //  ('psSolid', 'psDash', 'psDot', 'psDashDot', 'psDashDotDot');
-  //Brush_Styles =
-  //  ('bsClear', 'bsSolid', 'bsHorizontal', 'bsVertical',
-  //  'bsFDiagonal', 'bsBDiagonal', 'bsCross', 'bsDiagCross');
-  //
 end.
-

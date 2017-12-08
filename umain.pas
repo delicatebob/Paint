@@ -6,7 +6,7 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  Menus, ExtCtrls, Buttons, Spin, StdCtrls, aboutprogramModule, Utools,
+  Menus, ExtCtrls, Buttons, aboutprogramModule, Utools,
   UFigures, Uscale, Types, uProperty;
 
 type
@@ -45,8 +45,6 @@ var
   TopButtonAndPanel: integer = 0;
   MainForm: TMainForm;
   IsDrawing: boolean;
-  PenColor: TColor = clBlack;
-  BrushColor: TColor = clwhite;
   Tool: TTool;
   OnPressButton: TSpeedButton;
 
@@ -81,6 +79,8 @@ procedure TMainForm.PaintBoxMouseUp(Sender: TObject; Button: TMouseButton;
   Shift: TShiftState; X, Y: integer);
 begin
   IsDrawing := False;
+  Tool.MouseUp(Point(X, Y));
+  Paintbox.invalidate;
 end;
 
 procedure TMainForm.PaintBoxPaint(Sender: TObject);
@@ -102,7 +102,6 @@ begin
   if PropertyPanel <> nil then
     FreeAndNil(PropertyPanel);
   // end
-
   PTop := 0;
 end;
 
@@ -111,12 +110,15 @@ var
   i: integer;
 begin
   PropertyPanel := TPanel.Create(ToolsAndPropertyPanel);
-  PropertyPanel.Parent := ToolsAndPropertyPanel;
-  PropertyPanel.Name := 'PropertyPanel';
-  PropertyPanel.Caption := '';
-  PropertyPanel.Width := ToolsAndPropertyPanel.Width;
-  PropertyPanel.Height := 640;
-  PropertyPanel.Top := TopButtonAndPanel + ToolsAndPropertyPanel.Width div 2;
+  with PropertyPanel do
+  begin
+  Parent := ToolsAndPropertyPanel;
+  Name := 'PropertyPanel';
+  Caption := '';
+  Width := ToolsAndPropertyPanel.Width;
+  Height := 640;   //  How to do it right my friend?
+  Top := TopButtonAndPanel + ToolsAndPropertyPanel.Width div 2;
+  end;
   for i := 0 to High(Tool.Properties) do
   begin
     Tool.Properties[i].ParentPanel := PropertyPanel;

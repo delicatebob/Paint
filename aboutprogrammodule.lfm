@@ -11580,7 +11580,7 @@ object AboutProgramForm: TAboutProgramForm
     Height = 60
     Top = 8
     Width = 253
-    Caption = 'Создатель: Бондаревский Алексей Сергеевич.'#13#10'Группа:Б8103-Б.'#13#10'Версия:0.2'#13#10'Git: https://github.com/delicatebob/MyPaint'
+    Caption = 'Создатель: Бондаревский Алексей Сергеевич.'#13#10'Группа:Б8103-Б.'#13#10'Версия:0.3'#13#10'Git: https://github.com/delicatebob/MyPaint'
     Color = clWhite
     ParentColor = False
     Transparent = False

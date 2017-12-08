@@ -15,12 +15,20 @@ type
 
 function WorldToScreen(P: TDoublePoint): TPoint;
 function Scrn2Wrld(P: TPoint): TDoublePoint;
+function DoublePoint(X, Y: Double): TDoublePoint;
 
 var
   Zoom: integer;
   Offset: TPoint;
 
 implementation
+
+
+function DoublePoint(X, Y: Double): TDoublePoint;
+begin
+  Result.X := X;
+  Result.Y := Y;
+end;
 
 function WorldToScreen(P: TDoublePoint): TPoint;
 begin

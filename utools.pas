@@ -6,11 +6,12 @@ interface
 
 uses
   Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs,
-  Menus, ExtCtrls, Buttons, Spin, StdCtrls,
+  Menus, ExtCtrls, Buttons, LCLType, LCLIntf,
   UFigures, Types, uProperty;
 
 type
 
+  TAttributeTool = (Line, Figure, RoundFigure);
 
   TTool = class
     Properties: array of TProperty;
@@ -18,49 +19,59 @@ type
     Name, Icon: string;
     procedure FigureCreate(Point: TPoint); virtual; abstract;
     procedure AddPoint(Point: TPoint); virtual; abstract;
+    procedure MouseUp(Point: TPoint); virtual;
   end;
 
-  TLineTool = class(TTool)
+  TLinesTool = class(TTool)
+    constructor Create; virtual;
+    procedure FigureCreate(Point: TPoint); override;
   end;
 
-  TFigureTool = class(TLineTool)
+  TFiguresTool = class(TLinesTool)
+    constructor Create; override;
+    procedure FigureCreate(Point: TPoint); override;
   end;
 
-  TPencilTool = class(TLineTool)
-    constructor Create;
+  TPencilTool = class(TLinesTool)
     procedure FigureCreate(Point: TPoint); override;
     procedure AddPoint(Point: TPoint); override;
   end;
 
-  TPolylineTool = class(TLineTool)
-    constructor Create;
+  TPolylineTool = class(TLinesTool)
     procedure FigureCreate(Point: TPoint); override;
     procedure AddPoint(Point: TPoint); override;
   end;
 
-  TRectangleTool = class(TFigureTool)
-    constructor Create;
+  TRectangleTool = class(TFiguresTool)
     procedure FigureCreate(Point: TPoint); override;
     procedure AddPoint(Point: TPoint); override;
   end;
 
-  TEllipseTool = class(TFigureTool)
-    constructor Create;
+  TEllipseTool = class(TFiguresTool)
     procedure FigureCreate(Point: TPoint); override;
     procedure AddPoint(Point: TPoint); override;
   end;
 
-  TRoundRectangleTool = class(TFigureTool)
-    constructor Create;
+  TRoundRectangleTool = class(TFiguresTool)
+    constructor Create; override;
     procedure FigureCreate(Point: TPoint); override;
     procedure AddPoint(Point: TPoint); override;
   end;
 
-  THandTool = class(TFigureTool)
-    FIRSTPOINT: TPoint;
-    FIRSTOFFSET: TPoint;
+  THandTool = class(TTool)
+    firstpoint: TPoint;
+    firstoffset: TPoint;
     procedure FigureCreate(Point: TPoint); override;
     procedure AddPoint(Point: TPoint); override;
+  end;
+
+  TSelectTool = class(TRoundRectangleTool)
+    AttributeTool:TAttributeTool;
+    procedure FigureCreate(Point: TPoint); override;
+    procedure AddPoint(Point: TPoint); override;
+    procedure MouseUp(Point: TPoint); override;
+    procedure RectSelectTool(Point: TPoint);
+    procedure PointSelectTool(Point: TPoint);
   end;
 
 var
@@ -71,15 +82,17 @@ implementation
 
 uses Umain, UScale;
 
+procedure TTool.MouseUp(Point: TPoint);
+begin
+  //nothing
+end;
+
 procedure TPencilTool.FigureCreate(Point: TPoint);
 begin
   SetLength(Figures, Length(Figures) + 1);
   Figures[High(Figures)] := TPencil.Create;
-  Figures[High(Figures)].Awidth := PWidth;
-  Figures[High(Figures)].APenColor := PPenColor;
-  Figures[High(Figures)].APenStyle := PPenStyle;
   IsDrawing := True;
-  Tools[0].AddPoint(Point);
+  inherited;
 end;
 
 procedure TPencilTool.AddPoint(Point: TPoint);
@@ -95,15 +108,8 @@ procedure TPolylineTool.FigureCreate(Point: TPoint);
 begin
   SetLength(Figures, Length(Figures) + 1);
   Figures[High(Figures)] := TPolyline.Create;
-  Figures[High(Figures)].Awidth := PWidth;
-  Figures[High(Figures)].APenColor := PPenColor;
-  Figures[High(Figures)].APenStyle := PPenStyle;
   IsDrawing := True;
-  with (Figures[High(Figures)] as TPolyline) do
-  begin
-    SetLength(DPoints, 1);
-    DPoints[0] := Scrn2Wrld(Point);
-  end;
+  inherited;
 end;
 
 procedure TPolylineTool.AddPoint(Point: TPoint);
@@ -119,17 +125,8 @@ procedure TRectangleTool.FigureCreate(Point: TPoint);
 begin
   SetLength(Figures, Length(Figures) + 1);
   Figures[High(Figures)] := TRectangle.Create;
-  Figures[High(Figures)].Awidth := PWidth;
-  Figures[High(Figures)].APenColor := PPenColor;
-  Figures[High(Figures)].ABrushColor := PBrushColor;
-  Figures[High(Figures)].APenStyle := PPenStyle;
-  Figures[High(Figures)].ABrushStyle := PBrushStyle;
   IsDrawing := True;
-  with (Figures[High(Figures)] as TRectangle) do
-  begin
-    SetLength(DPoints, 1);
-    DPoints[0] := Scrn2Wrld(Point);
-  end;
+  inherited;
 end;
 
 procedure TRectangleTool.AddPoint(Point: TPoint);
@@ -145,17 +142,8 @@ procedure TEllipseTool.FigureCreate(Point: TPoint);
 begin
   SetLength(Figures, Length(Figures) + 1);
   Figures[High(Figures)] := TEllipse.Create;
-  Figures[High(Figures)].Awidth := PWidth;
-  Figures[High(Figures)].APenColor := PPenColor;
-  Figures[High(Figures)].ABrushColor := PBrushColor;
-  Figures[High(Figures)].APenStyle := PPenStyle;
-  Figures[High(Figures)].ABrushStyle := PBrushStyle;
   IsDrawing := True;
-  with (Figures[High(Figures)] as TEllipse) do
-  begin
-    SetLength(DPoints, 1);
-    DPoints[0] := Scrn2Wrld(Point);
-  end;
+  inherited;
 end;
 
 procedure TEllipseTool.AddPoint(Point: TPoint);
@@ -171,18 +159,12 @@ procedure TRoundRectangleTool.FigureCreate(Point: TPoint);
 begin
   SetLength(Figures, Length(Figures) + 1);
   Figures[High(Figures)] := TRoundRectangle.Create;
-  Figures[High(Figures)].Awidth := PWidth;
-  Figures[High(Figures)].APenColor := PPenColor;
-  Figures[High(Figures)].ABrushColor := PBrushColor;
-  Figures[High(Figures)].APenStyle := PPenStyle;
-  Figures[High(Figures)].ABrushStyle := PBrushStyle;
-  Figures[High(Figures)].ARoundX := PRoundX;
-  Figures[High(Figures)].ARoundY := PRoundY;
   IsDrawing := True;
-  with (Figures[High(Figures)] as TRoundRectangle) do
+  inherited;
+  with (Figures[high(Figures)] as TRoundRectangle) do
   begin
-    SetLength(DPoints, 1);
-    DPoints[0] := Scrn2Wrld(Point);
+    ARoundX:=PRoundX;
+    ARoundY:=PRoundY;
   end;
 end;
 
@@ -197,16 +179,98 @@ end;
 
 procedure THandTool.FigureCreate(Point: TPoint);
 begin
-  FIRSTPOINT := Point;
-  FIRSTOFFSET := offset;
+  firstpoint := Point;
+  firstoffset := offset;
 end;
 
 procedure THandTool.AddPoint(Point: TPoint);
 begin
-  offset := FIRSTOFFSET + FIRSTPOINT - Point;
+  offset := firstoffset + firstpoint - Point;
 end;
 
-constructor TPencilTool.Create;
+procedure TSelectTool.FigureCreate(Point: TPoint);
+begin
+  SetLength(Figures, Length(Figures) + 1);
+  Figures[High(Figures)] := TFrame.Create;
+  IsDrawing := True;
+  with (Figures[High(Figures)] as TFrame) do
+  begin
+    SetLength(DPoints, 2);
+    DPoints[0] := Scrn2Wrld(Point);
+    DPoints[1] := Scrn2Wrld(Point);
+  end;
+end;
+
+procedure TSelectTool.AddPoint(Point: TPoint);
+begin
+  Figures[High(Figures)].DPoints[1] := Scrn2Wrld(Point);
+end;
+
+procedure TSelectTool.MouseUp(Point: TPoint);
+var
+  ToolRegion: HRGN;
+  i: integer;
+begin
+  with Figures[High(Figures)] do
+  begin
+    Region := CreateRectRgn(WorldToScreen(DPoints[0]).X,
+      WorldToScreen(DPoints[0]).Y, WorldToScreen(DPoints[1]).X,
+      WorldToScreen(DPoints[1]).Y);
+  end;
+  for i := 0 to High(Figures) - 1 do
+  begin
+    if (CombineRgn(ToolRegion, Figures[i].Region, Figures[High(Figures)].Region,
+      RGN_AND) <> NullRegion) then
+      Figures[i].isSelected := False;
+  end;
+  with Figures[High(Figures)] do
+  begin
+    if (not ((DPoints[0].X = DPoints[1].X) and (DPoints[0].Y = DPoints[1].Y))) then
+      RectSelectTool(Point)
+    else
+      PointSelectTool(Point);
+  end;
+  SetLength(Figures, Length(Figures) - 1);
+end;
+
+procedure TSelectTool.RectSelectTool(Point: TPoint);
+var
+  i: integer;
+  ToolRegion: HRGN;
+begin
+  for i := 0 to High(Figures) - 1 do
+  begin
+    DeleteObject(Figures[i].Region);
+    Figures[i].CreateRegion;
+    ToolRegion := CreateRectRgn(1, 1, 2, 2);
+    if (CombineRgn(ToolRegion, Figures[i].Region, Figures[High(Figures)].Region,
+      RGN_AND) <> NULLREGION) then
+      if (Figures[i].isSelected = False) then
+        Figures[i].isSelected := True
+      else
+        Figures[i].isSelected := False;
+    DeleteObject(ToolRegion);
+  end;
+end;
+
+procedure TSelectTool.PointSelectTool(Point: TPoint);
+var
+  I: integer;
+begin
+  for i := High(Figures) - 1 downto Low(Figures) do
+    with Figures[i] do
+    begin
+      DeleteObject(Region);
+      CreateRegion;
+      if (PtInRegion(Region, Point.X, Point.Y) = True) then
+        if (isSelected = False) then
+          isSelected := True
+        else
+          isSelected := False;
+    end;
+end;
+
+constructor TLinesTool.Create;
 begin
   SetLength(Properties, 3);
   Properties[0] := TWidthProperty.Create;
@@ -214,43 +278,42 @@ begin
   Properties[2] := TPenStyleProperty.Create;
 end;
 
-constructor TPolylineTool.Create;
+constructor TFiguresTool.Create;
 begin
-  SetLength(Properties, 3);
-  Properties[0] := TWidthProperty.Create;
-  Properties[1] := TPenColorProperty.Create;
-  Properties[2] := TPenStyleProperty.Create;
-end;
-
-constructor TRectangleTool.Create;
-begin
+  inherited;
   SetLength(Properties, 5);
-  Properties[0] := TWidthProperty.Create;
-  Properties[1] := TPenColorProperty.Create;
-  Properties[2] := TPenStyleProperty.Create;
-  Properties[3] := TBrushColorProperty.Create;
-  Properties[4] := TBrushStyleProperty.Create;
-end;
-
-constructor TEllipseTool.Create;
-begin
-  SetLength(Properties, 5);
-  Properties[0] := TWidthProperty.Create;
-  Properties[1] := TPenColorProperty.Create;
-  Properties[2] := TPenStyleProperty.Create;
   Properties[3] := TBrushColorProperty.Create;
   Properties[4] := TBrushStyleProperty.Create;
 end;
 
 constructor TRoundRectangleTool.Create;
 begin
+  inherited;
   SetLength(Properties, 6);
-  Properties[0] := TWidthProperty.Create;
-  Properties[1] := TPenColorProperty.Create;
-  Properties[2] := TPenStyleProperty.Create;
-  Properties[3] := TBrushColorProperty.Create;
-  Properties[4] := TBrushStyleProperty.Create;
   Properties[5] := TRoundProperty.Create;
+end;
+
+procedure TLinesTool.FigureCreate(Point: TPoint);
+begin
+  with (Figures[High(Figures)] as TLines) do
+  begin
+  SetLength(DPoints, 2);
+  DPoints[0] := Scrn2Wrld(Point);
+  DPoints[1] := Scrn2Wrld(Point);
+  AWidth := PWidth;
+  APenColor := PPenColor;
+  APenStyle := PPenStyle;
+  end;
+end;
+
+procedure TFiguresTool.FigureCreate(Point: TPoint);
+begin
+  inherited;
+  with (Figures[High(Figures)] as TFigures) do
+  begin
+  ABrushStyle := PBrushStyle;
+  ABrushColor := PBrushColor;
+  end;
 end;
 
 procedure RegisterTool(ATool: TTool; Aclass: TfigureClass; AName: string; AIcon: string);
@@ -263,12 +326,13 @@ begin
 end;
 
 initialization
-  RegisterTool(TPencilTool.Create, Tpencil, 'Pencil', 'Pencil.jpg');
-  RegisterTool(TPolylineTool.Create, TPolyline, 'Polyline', 'Polyline.jpg');
-  RegisterTool(TRectangleTool.Create, TRectangle, 'Rectangle', 'Rectangle.jpg');
-  RegisterTool(TEllipseTool.Create, TEllipse, 'Ellipse', 'Ellipse.jpg');
+  RegisterTool(TPencilTool.Create, Tpencil, 'Pencil', 'Pencil.png');
+  RegisterTool(TPolylineTool.Create, TPolyline, 'Polyline', 'Polyline.png');
+  RegisterTool(TRectangleTool.Create, TRectangle, 'Rectangle', 'Rectangle.png');
+  RegisterTool(TEllipseTool.Create, TEllipse, 'Ellipse', 'Ellipse.png');
   RegisterTool(TRoundRectangleTool.Create, TRoundRectangle, 'RoundRectangle',
-    'RoundRectangle.jpg');
-  RegisterTool(THandTool.Create, nil, 'Hand', 'Hand.jpg');
+    'RoundRectangle.png');
+  RegisterTool(THandTool.Create, nil, 'Hand', 'Hand.png');
+  RegisterTool(TSelectTool.Create, Nil, 'Select', 'Select.png');
 
 end.
